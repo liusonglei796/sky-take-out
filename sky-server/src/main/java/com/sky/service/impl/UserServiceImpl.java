@@ -1,5 +1,7 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sky.constant.MessageConstant;
@@ -57,15 +59,16 @@ public class UserServiceImpl implements UserService {
         map.put("js_code", code);
         map.put("grant_type", "authorization_code");
 
-        String jsonResponse = HttpClientUtil.doGet(WX_LOGIN, map);
+        String json = HttpClientUtil.doGet(WX_LOGIN, map);
 
         // 直接解析 JSON 字符串
-        JsonObject jsonObject = new Gson().fromJson(jsonResponse, JsonObject.class);
-
-        // 如果有 openid 就返回，否则返回 null
-        if (jsonObject.has("openid")) {
-            return jsonObject.get("openid").getAsString();
-        }
-        return null;
+        JSONObject jsonObject = JSON.parseObject(json);
+//        // 如果有 openid 就返回，否则返回 null
+//        if (jsonObject.has("openid")) {
+//            return jsonObject.get("openid").getAsString();
+//        }
+//        return null;
+        String openid = jsonObject.getString("openid");
+        return openid;
     }
 }

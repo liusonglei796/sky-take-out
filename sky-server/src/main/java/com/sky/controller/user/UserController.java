@@ -1,5 +1,6 @@
 package com.sky.controller.user;
 
+import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.UserLoginDTO;
 import com.sky.entity.User;
 import com.sky.properties.JwtProperties;
@@ -30,17 +31,18 @@ public class UserController {
 
     @PostMapping("/login")
     public Result<UserLoginVO> login(@RequestBody UserLoginDTO userLoginDTO){
+        log.info("微信登录：{}",userLoginDTO);
         //微信登录
         User user =userService.wxLogin(userLoginDTO);
         //为微信用户生成JWT令牌
         Map<String,Object> claims=new HashMap<>();
-        claims.put("userId",user.getId());
+        claims.put(JwtClaimsConstant.USER_ID,user.getId());
         String token =JwtUtil.createJWT(jwtProperties.getUserSecretKey(),jwtProperties.getUserTtl(),claims);
         UserLoginVO userLoginVO =UserLoginVO.builder()
                 .id(user.getId())
                 .openid(user.getOpenid())
                 .token(token)
                 .build();
-        return Result.success(userLoginVO);
+          return Result.success(userLoginVO);
     }
 }
