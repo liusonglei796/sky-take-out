@@ -33,7 +33,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         Long userId = BaseContext.getCurrentId();
         shoppingCart.setUserId(userId);
         //Long userId = BaseContext.setCurrentId(BaseContext.getCurrentId());
-        shoppingCart.setUserId(userId);
+        //shoppingCart.setUserId(userId);
         List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
         //如果已经存在，则数量加1
         if(list!=null&&list.size()>0){
