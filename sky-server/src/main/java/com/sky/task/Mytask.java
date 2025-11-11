@@ -11,7 +11,7 @@ import java.util.Date;
 public class Mytask {
 
     //定时任务
-    @Scheduled(cron = "0/5 * * * * ?")
+    //@Scheduled(cron = "0/5 * * * * ?")
     public void task1(){
         log.info("开始执行定时任务{}",new Date());
     }
