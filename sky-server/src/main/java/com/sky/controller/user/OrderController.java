@@ -6,7 +6,7 @@ import com.sky.result.Result;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +31,7 @@ public class OrderController {
      * @return
      */
     @PutMapping("/payment")
-    @ApiOperation("订单支付")
+    @Operation(summary = "订单支付")
 //    public Result<OrderPaymentVO> payment(@RequestBody OrdersPaymentDTO ordersPaymentDTO) throws Exception {
 //        log.info("订单支付：{}", ordersPaymentDTO);
 //        OrderPaymentVO orderPaymentVO = orderService.payment(ordersPaymentDTO);

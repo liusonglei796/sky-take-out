@@ -4,7 +4,7 @@ import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.ShoppingCart;
 import com.sky.result.Result;
 import com.sky.service.ShoppingCartService;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/user/shoppingCart")
 @Slf4j
-@Api(tags = "C端-购物车接口")
+@Tag(name = "C端-购物车接口")
 public class ShoppingCartController {
     @Autowired
     private ShoppingCartService shoppingCartService;

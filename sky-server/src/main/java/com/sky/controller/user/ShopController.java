@@ -27,7 +27,7 @@
 package com.sky.controller.user;
 
 import com.sky.result.Result;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate; // 使用 StringRedisTemplate
@@ -45,7 +45,7 @@ public class ShopController {
      * 设置营业状态
      */
     @PutMapping("/{status}")
-    @ApiOperation("设置营业状态")
+    @Operation(summary = "设置营业状态")
     public Result setStatus(@PathVariable Integer status) {
         // 校验参数
         if (status != 0 && status != 1) {

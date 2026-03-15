@@ -1,0 +1,352 @@
+# Design Document — Java 25 + Spring Boot 4.0 重构
+
+## Overview
+
+将 sky-take-out（苍穹外卖）从 Java 17 + Spring Boot 3.4.3 升级重构至 Java 25 + Spring Boot 4.0.x。
+本文档描述每个重构点的技术选型、实现方式、改动范围，以及需要规避的风险。
+整体策略：**最小化业务逻辑改动，优先做技术栈升级和语言现代化**。
+
+---
+
+## Architecture Overview
+
+```mermaid
+graph TD
+    subgraph sky-pojo ["sky-pojo（重构：Lombok @Data → Record / 保留Entity）"]
+        DTO["DTO（纯数据传输）\n→ Java 25 Record"]
+        VO["VO（视图对象）\n→ Java 25 Record"]
+        Entity["Entity（含业务状态）\n→ 保留 @Data，适配 MyBatis"]
+    end
+
+    subgraph sky-common ["sky-common（升级：javax → jakarta，jjwt 0.12.x）"]
+        JwtUtil["JwtUtil\n→ jjwt 0.12.x API"]
+        BaseContext["BaseContext\n→ ScopedValue (Java 25 可选)"]
+        Properties["@ConfigurationProperties\n→ JSpecify @NonNull"]
+    end
+
+    subgraph sky-server ["sky-server（升级：Spring Boot 4.0，虚拟线程，Knife4j 5.x）"]
+        Config["WebMvcConfiguration\n→ 去除 Springfox Docket\n→ Knife4j 5.x / SpringDoc"]
+        Interceptor["JWT 拦截器\n→ jakarta.servlet.*（已OK）"]
+        Mapper["MyBatis Mapper\n→ mybatis-spring-boot-starter 4.x"]
+        VirtualThread["application.yml\n→ virtual.enabled=true"]
+    end
+
+    sky-pojo --> sky-server
+    sky-common --> sky-server
+```
+
+---
+
+## 各重构点技术设计
+
+### 1. 父 POM 升级（pom.xml）
+
+**技术选型：**
+- Java：`25`（LTS，September 2025）
+- Spring Boot：`4.0.x`（基于 Spring Framework 7，Jakarta EE 11，Tomcat 11）
+- 构建工具：Maven（保持不变）
+
+**关键版本映射：**
+
+| 组件 | 旧版本 | 新版本 |
+|------|--------|--------|
+| Spring Boot | 3.4.3 | 4.0.x |
+| Java | 17 | 25 |
+| MyBatis Spring Boot Starter | 3.x (mybatis.spring=3.x) | 4.0.1 |
+| Druid | druid-spring-boot-3-starter 1.2.21 | druid-spring-boot-3-starter 1.2.23+（兼容 SB4）|
+| PageHelper | 2.1.0 | 2.1.0（已兼容 SB4）|
+| Knife4j | 4.4.0 (knife4j-openapi3-jakarta) | 5.x (knife4j-openapi3-jakarta-spring-boot-starter) |
+| jjwt | 0.9.1 | 0.12.x（jjwt-api + jjwt-impl + jjwt-jackson）|
+| Fastjson | 1.2.83 | 保留或换 Jackson（SB4 默认 Jackson 3.0）|
+| commons-lang | 2.6 | commons-lang3 3.19.0（SB4 推荐）|
+| AspectJ | 1.9.21 | 使用 `spring-boot-starter-aspectj` |
+| POI | 5.2.5 | 5.2.5（无需升级）|
+| 微信支付 | 0.4.8 | 0.4.8（无需升级）|
+| 阿里云 OSS | 3.17.4 | 3.17.4（无需升级）|
+
+**去除的依赖：**
+- `springfox` 相关（`Docket`、`@ApiModel`、`@ApiModelProperty` 来自 `io.swagger.annotations`）
+
+**新增依赖结构（pom.xml 父 POM）：**
+```xml
+<parent>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <groupId>org.springframework.boot</groupId>
+    <version>4.0.x</version>
+</parent>
+<properties>
+    <java.version>25</java.version>
+    <jjwt.version>0.12.6</jjwt.version>
+    <knife4j.version>5.x</knife4j.version>
+    ...
+</properties>
+```
+
+---
+
+### 2. API 文档组件替换（WebMvcConfiguration）
+
+**问题：**
+`WebMvcConfiguration` 当前使用 `springfox.documentation.*`（`Docket`、`ApiInfoBuilder`），该库在 Spring Boot 3.x 已不兼容，Spring Boot 4.0 完全移除支持。
+
+**新方案：Knife4j 5.x（基于 SpringDoc OpenAPI 3）**
+
+```java
+// 旧代码（删除）
+@Bean
+public Docket docket() { ... }  // springfox API
+
+// 新代码（application.yml 配置化，无需 @Bean）
+// knife4j:
+//   enable: true
+//   openapi:
+//     title: 苍穹外卖项目接口文档
+//     version: "2.0"
+```
+
+`WebMvcConfiguration` 改为继承 `WebMvcConfigurer`（而非 `WebMvcConfigurationSupport`）以避免覆盖 Spring Boot 4.0 自动配置：
+
+```java
+@Configuration
+public class WebMvcConfiguration implements WebMvcConfigurer {
+    // addInterceptors / addResourceHandlers 保持不变
+    // 删除 Docket @Bean
+}
+```
+
+**DTO/VO 注解替换：**
+- `@ApiModel` → `@Schema`（springdoc `io.swagger.v3.oas.annotations.media.Schema`）
+- `@ApiModelProperty` → `@Schema(description="...")`
+- `@Api` → `@Tag`
+
+---
+
+### 3. POJO 层现代化（sky-pojo）
+
+#### 3a. DTO → Java 25 Record
+
+**适用条件：** 纯数据容器，无继承，无业务方法，字段不可变。
+
+**转换示例：**
+```java
+// 旧
+@Data
+@ApiModel(description = "员工登录时传递的数据模型")
+public class EmployeeLoginDTO implements Serializable {
+    @ApiModelProperty("用户名")
+    private String username;
+    @ApiModelProperty("密码")
+    private String password;
+}
+
+// 新
+@Schema(description = "员工登录时传递的数据模型")
+public record EmployeeLoginDTO(
+    @Schema(description = "用户名") String username,
+    @Schema(description = "密码")   String password
+) {}
+```
+
+**不转换 Record 的情况（保留 @Data 类）：**
+- `Entity`（如 `Employee`）：MyBatis 需要无参构造器 + setter，Record 不兼容
+- 含有 `@Builder` 且需要 mutable 的 DTO（如 `OrdersDTO`）
+- 含有 `@JsonProperty` 等特殊序列化需求的 VO
+
+#### 3b. Entity 保留 @Data
+
+Entity 类需要与 MyBatis 配合（无参构造 + getter/setter），继续使用 Lombok，但将 `@Data` 拆分为更精准的组合注解：
+
+```java
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder
+public class Employee implements Serializable { ... }
+```
+
+---
+
+### 4. JWT 升级（JwtUtil）
+
+**问题：** jjwt 0.9.1 使用了已废弃 API（`SignatureAlgorithm`、`Jwts.parser().setSigningKey()`），jjwt 0.12.x 完全重写了 builder/parser API。
+
+**新 API 设计：**
+```java
+// jjwt 0.12.x
+public class JwtUtil {
+
+    public static String createJWT(String secretKey, long ttlMillis, Map<String, Object> claims) {
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        return Jwts.builder()
+                .claims(claims)
+                .expiration(new Date(System.currentTimeMillis() + ttlMillis))
+                .signWith(key)        // 自动选择 HS256/HS384/HS512
+                .compact();
+    }
+
+    public static Claims parseJWT(String secretKey, String token) {
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+}
+```
+
+**新增 pom 依赖（替换旧 jjwt）：**
+```xml
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.12.6</version>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.12.6</version>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.12.6</version>
+    <scope>runtime</scope>
+</dependency>
+```
+
+---
+
+### 5. 虚拟线程启用
+
+**配置（application.yml）：**
+```yaml
+spring:
+  threads:
+    virtual:
+      enabled: true
+```
+
+Spring Boot 4.0 自动将 Tomcat 线程池切换为虚拟线程执行器。
+
+**Java 25 Virtual Thread 改进点（相比 Java 21）：**
+- JEP 491：解决了 `synchronized` 块导致的虚拟线程 pinning 问题
+- 因此 `AutoFillAspect`、`JwtTokenAdminInterceptor` 中的 `synchronized`（如有）无需改造
+
+**WebSocket 兼容性：**
+`WebSocketConfiguration` 与 `WebSocketServer` 使用 `@ServerEndpoint`，需确认 `jakarta.websocket.*` 版本兼容（Spring Boot 4.0 基于 Jakarta WebSocket 2.2）。
+
+---
+
+### 6. 空安全（JSpecify）
+
+**目标层：** sky-common 的 `utils/` 和 `properties/`，sky-server 的 `service/` 接口。
+
+**注解引入：**
+```xml
+<!-- Spring Boot 4.0 已内置传递 jspecify -->
+<dependency>
+    <groupId>org.jspecify</groupId>
+    <artifactId>jspecify</artifactId>
+</dependency>
+```
+
+**示例改造：**
+```java
+// sky-common/properties/JwtProperties.java
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+@ConfigurationProperties(prefix = "sky.jwt")
+public class JwtProperties {
+    @NonNull private String adminSecretKey;
+    private long adminTtl;
+    @NonNull private String adminTokenName;
+    // ... getters
+}
+```
+
+---
+
+### 7. AutoFillAspect 现代化
+
+当前反射方式（`getDeclaredMethod("setUpdateTime", ...)`）在 Java 25 下仍可工作，但可以利用模式匹配和方法句柄（`MethodHandle`）提升性能：
+
+```java
+// 使用 MethodHandles 替换 getDeclaredMethod + invoke（可选优化）
+MethodHandles.Lookup lookup = MethodHandles.lookup();
+MethodHandle setUpdateTime = lookup.findVirtual(
+    entity.getClass(), "setUpdateTime",
+    MethodType.methodType(void.class, LocalDateTime.class)
+);
+setUpdateTime.invoke(entity, now);
+```
+
+---
+
+### 8. commons-lang 升级
+
+旧：`commons-lang:commons-lang:2.6`（`org.apache.commons.lang.*`）
+新：`commons-lang3:3.19.0`（`org.apache.commons.lang3.*`）
+
+影响范围：扫描 `import org.apache.commons.lang.` 的引用，改为 `org.apache.commons.lang3.`。
+
+---
+
+## 模块改动范围汇总
+
+| 模块 | 文件 | 改动类型 |
+|------|------|----------|
+| 根 pom.xml | pom.xml | 版本升级、依赖替换 |
+| sky-pojo | 所有 DTO（~20个） | `@Data` → `record`，`@ApiModel` → `@Schema` |
+| sky-pojo | 所有 VO（~15个） | 同上（部分保留 class） |
+| sky-pojo | 所有 Entity（~10个） | `@ApiModel` 删除，Lombok 保留 |
+| sky-common | JwtUtil.java | jjwt 0.9.1 → 0.12.x API |
+| sky-common | Properties 类 | 添加 JSpecify 注解 |
+| sky-common | commons-lang import | lang → lang3 |
+| sky-server | WebMvcConfiguration.java | 删除 Docket，改为 Knife4j 5.x yml 配置 |
+| sky-server | application.yml | 添加 `spring.threads.virtual.enabled=true` |
+| sky-server | AutoFillAspect.java | 可选：MethodHandle 优化 |
+| sky-server | 所有 Controller | `@Api`→`@Tag`, `@ApiOperation`→`@Operation` |
+
+---
+
+## Error Handling
+
+### 错误场景
+
+1. **MyBatis 与 Record 不兼容**
+   - **描述：** MyBatis 默认需要无参构造，Record 不支持
+   - **处理：** Entity 全部保留普通类，DTO/VO 中若 MyBatis 直接映射则保留类
+   - **验证：** 启动后执行 SELECT 查询确认结果映射正确
+
+2. **jjwt 0.12.x API 不兼容旧 Token**
+   - **描述：** 旧 Token 用 0.9.1 签名，0.12.x 解析默认严格模式
+   - **处理：** 新旧 API 签名算法均为 HS256，密钥长度 ≥ 256-bit 时完全兼容，无需特殊处理
+
+3. **Springfox 类不存在导致启动失败**
+   - **描述：** `WebMvcConfiguration` 引用 `springfox.documentation.*`，升级后类不存在
+   - **处理：** 在任务 5 中完整替换，删除所有 springfox import
+
+4. **虚拟线程 + ThreadLocal 数据丢失**
+   - **描述：** `BaseContext` 使用 `ThreadLocal`，虚拟线程调度时存在跨线程切换
+   - **处理：** Spring Boot 4.0 的虚拟线程对 `ThreadLocal` 兼容，但建议评估是否迁移到 `ScopedValue`（Java 25 正式特性）
+
+---
+
+## Testing Strategy
+
+### Unit Testing
+- 每个 Record DTO 验证构造器、accessor、`equals`/`hashCode`
+- `JwtUtil` 新 API 验证 token 生成与解析的双向正确性
+- `AutoFillAspect` 验证 INSERT/UPDATE 场景字段填充
+
+### Integration Testing
+- 启动 Spring Boot 4.0 完整上下文，验证所有 Controller 路由可访问
+- 虚拟线程场景：并发 50 请求验证无 pinning 异常
+
+### Smoke Testing（冒烟测试）
+- 管理端：登录 → 查询员工 → 新增菜品 → 查看订单
+- 用户端：微信登录 → 浏览菜品 → 加入购物车 → 下单 → 支付
+- 文件上传：图片上传至 OSS
+- 报表导出：Excel 下载

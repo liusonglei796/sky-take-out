@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/java25-springboot4-refactor/tasks.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2026-03-15T09:20:41.537Z",
+      "trigger": "initial",
+      "approvalId": "approval_1773566441515_i75sr1kzf",
+      "approvalTitle": "任务拆解文档 — Java 25 + Spring Boot 4.0 重构"
+    }
+  ]
+}

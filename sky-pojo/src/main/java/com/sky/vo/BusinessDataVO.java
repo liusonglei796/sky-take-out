@@ -1,29 +1,17 @@
 package com.sky.vo;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-
 /**
- * 数据概览
+ * 数据概览 VO（Java 25 Record）
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class BusinessDataVO implements Serializable {
-
-    private Double turnover;//营业额
-
-    private Integer validOrderCount;//有效订单数
-
-    private Double orderCompletionRate;//订单完成率
-
-    private Double unitPrice;//平均客单价
-
-    private Integer newUsers;//新增用户数
-
-}
+public record BusinessDataVO(
+        /** 营业额 */
+        Double turnover,
+        /** 有效订单数 */
+        Integer validOrderCount,
+        /** 订单完成率 */
+        Double orderCompletionRate,
+        /** 平均客单价 */
+        Double unitPrice,
+        /** 新增用户数 */
+        Integer newUsers
+) {}

@@ -1,0 +1,67 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] sky-take-out                                                       [pom]
+[INFO] sky-common                                                         [jar]
+[INFO] 
+[INFO] ------------------------< com.sky:sky-take-out >------------------------
+[INFO] Building sky-take-out 1.0-SNAPSHOT                                 [1/2]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ sky-take-out ---
+[INFO] 
+[INFO] -------------------------< com.sky:sky-common >-------------------------
+[INFO] Building sky-common 1.0-SNAPSHOT                                   [2/2]
+[INFO]   from sky-common\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ sky-common ---
+[INFO] Deleting D:\sky-take-out\sky-common\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ sky-common ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ sky-common ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 28 source files with javac [debug parameters release 21] to target\classes
+[INFO] /D:/sky-take-out/sky-common/src/main/java/com/sky/utils/WeChatPayUtil.java: D:\sky-take-out\sky-common\src\main\java\com\sky\utils\WeChatPayUtil.java使用或覆盖了已过时的 API。
+[INFO] /D:/sky-take-out/sky-common/src/main/java/com/sky/utils/WeChatPayUtil.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] /D:/sky-take-out/sky-common/src/main/java/com/sky/result/Result.java: 某些输入文件使用了未经检查或不安全的操作。
+[INFO] /D:/sky-take-out/sky-common/src/main/java/com/sky/result/Result.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /D:/sky-take-out/sky-common/src/main/java/com/sky/utils/AliOssUtil.java:[64,9] 找不到符号
+  符号:   变量 log
+  位置: 类 com.sky.utils.AliOssUtil
+[INFO] 1 error
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for sky-take-out 1.0-SNAPSHOT:
+[INFO] 
+[INFO] sky-take-out ....................................... SUCCESS [  0.113 s]
+[INFO] sky-common ......................................... FAILURE [  1.702 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.151 s
+[INFO] Finished at: 2026-03-15T17:03:36+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.1:compile (default-compile) on project sky-common: Compilation failure
+[ERROR] /D:/sky-take-out/sky-common/src/main/java/com/sky/utils/AliOssUtil.java:[64,9] 找不到符号
+[ERROR]   符号:   变量 log
+[ERROR]   位置: 类 com.sky.utils.AliOssUtil
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :sky-common

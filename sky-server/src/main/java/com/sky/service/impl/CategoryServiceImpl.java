@@ -41,8 +41,11 @@ public class CategoryServiceImpl implements CategoryService {
      */
     public void save(CategoryDTO categoryDTO) {
         Category category = new Category();
-        //属性拷贝
-        BeanUtils.copyProperties(categoryDTO, category);
+        // CategoryDTO 是 Record，手动映射字段
+        category.setId(categoryDTO.id());
+        category.setType(categoryDTO.type());
+        category.setName(categoryDTO.name());
+        category.setSort(categoryDTO.sort());
 
         //分类状态默认为禁用状态0
         category.setStatus(StatusConstant.DISABLE);
@@ -97,7 +100,11 @@ public class CategoryServiceImpl implements CategoryService {
      */
     public void update(CategoryDTO categoryDTO) {
         Category category = new Category();
-        BeanUtils.copyProperties(categoryDTO,category);
+        // CategoryDTO 是 Record，手动映射字段
+        category.setId(categoryDTO.id());
+        category.setType(categoryDTO.type());
+        category.setName(categoryDTO.name());
+        category.setSort(categoryDTO.sort());
 
         //设置修改时间、修改人
         //category.setUpdateTime(LocalDateTime.now());

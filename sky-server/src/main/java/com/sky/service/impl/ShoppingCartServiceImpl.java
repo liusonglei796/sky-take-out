@@ -29,7 +29,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     public void addShoppingCart(ShoppingCartDTO shoppingCartDTO) {
         //判断当前加入到的购物车中的商品是否在购物车中
         ShoppingCart shoppingCart = new ShoppingCart();
-        BeanUtils.copyProperties(shoppingCartDTO,shoppingCart);
+        // ShoppingCartDTO 是 Record，手动映射字段
+        shoppingCart.setDishId(shoppingCartDTO.dishId());
+        shoppingCart.setSetmealId(shoppingCartDTO.setmealId());
+        shoppingCart.setDishFlavor(shoppingCartDTO.dishFlavor());
         Long userId = BaseContext.getCurrentId();
         shoppingCart.setUserId(userId);
         //Long userId = BaseContext.setCurrentId(BaseContext.getCurrentId());
@@ -44,7 +47,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             //如果不存在，则添加到购物车中，数量默认为1
 
             //判断本次添加到购物车的是菜品还是套餐
-            Long dishId = shoppingCartDTO.getDishId();
+            Long dishId = shoppingCartDTO.dishId();
             if(dishId!=null){
                 //本次添加到购物车的是菜品
                 Dish dish = dishMapper.getById(dishId);
@@ -56,7 +59,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
             }else{
                 //本次添加到购物车是套餐
-                Long setmealId = shoppingCartDTO.getSetmealId();
+                Long setmealId = shoppingCartDTO.setmealId();
                 Setmeal setmeal = setmealMapper.getById(setmealId);
                 shoppingCart.setName(setmeal.getName());
                 shoppingCart.setImage(setmeal.getImage() );

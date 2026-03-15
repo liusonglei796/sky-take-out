@@ -1,15 +1,6 @@
 package com.sky.dto;
 
-import lombok.Data;
-
-import java.io.Serializable;
-
 /**
- * C端用户登录
+ * C端用户登录 DTO（Java 25 Record）
  */
-@Data
-public class UserLoginDTO implements Serializable {
-
-    private String code;
-
-}
+public record UserLoginDTO(String code) {}

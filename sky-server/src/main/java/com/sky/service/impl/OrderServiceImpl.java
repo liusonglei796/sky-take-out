@@ -88,12 +88,11 @@ public class OrderServiceImpl implements OrderService {
         //4.清空当前用户的购物车数据
         shoppingCartMapper.deleteByUserId(userId);
         //5.封装VO返回数据
-        OrderSubmitVO orderSubmitVO = OrderSubmitVO.builder()
-                .id(orders.getId())
-                .orderTime(orders.getOrderTime())
-                .orderNumber(orders.getNumber())
-                .orderAmount(orders.getAmount())
-                .build();
+        OrderSubmitVO orderSubmitVO = new OrderSubmitVO(
+                orders.getId(),
+                orders.getNumber(),
+                orders.getAmount(),
+                orders.getOrderTime());
         return orderSubmitVO;
     }
 

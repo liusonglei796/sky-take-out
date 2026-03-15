@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/java25-springboot4-refactor/requirements.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2026-03-15T09:14:51.637Z",
+      "trigger": "initial",
+      "approvalId": "approval_1773566091619_y9u31ie7d",
+      "approvalTitle": "重构需求文档 — Java 25 + Spring Boot 4.0"
+    }
+  ]
+}

@@ -12,11 +12,10 @@ spring:
       url: jdbc:mysql://${sky.datasource.host}:${sky.datasource.port}/${sky.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username: ${sky.datasource.username}
       password: ${sky.datasource.password}
-  redis:
-    host: ${sky.redis.host}
-    port: ${sky.redis.port}
-    password: ${sky.redis.password}
-    database: ${sky.redis.database}
+  # Java 25 虚拟线程（Project Loom），提升高并发吞吐量
+  threads:
+    virtual:
+      enabled: true
 
 mybatis:
   #mapper配置文件
@@ -34,33 +33,26 @@ logging:
         service: info
         controller: info
 
+# Knife4j 5.x API 文档配置（替代原 Springfox Docket Bean）
+knife4j:
+  enable: true
+  openapi:
+    title: 苍穹外卖项目接口文档
+    description: 苍穹外卖管理端与用户端 REST API
+    version: "2.0"
+    group:
+      admin:
+        group-name: 管理端接口
+        packages-to-scan: com.sky.controller.admin,com.sky.controller.nofity
+      user:
+        group-name: 用户端接口
+        packages-to-scan: com.sky.controller.user
+
 sky:
   jwt:
     # 设置jwt签名加密时使用的秘钥
     admin-secret-key: itcast
     # 设置jwt过期时间
-    admin-ttl: 720000000
+    admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
-    user-secret-key: itheima
-    user-ttl: 720000000
-    user-token-name: authentication
-
-
-
-  alioss:
-    endpoint: ${sky.alioss.endpoint}
-    access-key-id: ${sky.alioss.access-key-id}
-    access-key-secret: ${sky.alioss.access-key-secret}
-    bucket-name: ${sky.alioss.bucket-name}
-
-  wechat:
-    appid: ${sky.wechat.appid}
-    secret: ${sky.wechat.secret}
-    mchId: ${sky.wechat.mchId}
-    mchSerialNo: ${sky.wechat.mchSerialNo}
-    privateKeyFilePath: ${sky.wechat.privateKeyFilePath}
-    apiV3Key: ${sky.wechat.apiV3Key}
-    weChatPayCertFilePath: ${sky.wechat.weChatPayCertFilePath}
-    notifyUrl: ${sky.wechat.notifyUrl}
-    refundNotifyUrl: ${sky.wechat.refundNotifyUrl}

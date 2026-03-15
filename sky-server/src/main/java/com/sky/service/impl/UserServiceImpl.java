@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
     //微信登录
     public User wxLogin(UserLoginDTO userLoginDTO) {
 
-        String openid = getOpenid(userLoginDTO.getCode());
+        String openid = getOpenid(userLoginDTO.code());
         //判断openid是否为空，如果为空则登录失败，抛出业务异常
         if (openid == null) {
             throw new LoginFailedException(MessageConstant.LOGIN_FAILED);

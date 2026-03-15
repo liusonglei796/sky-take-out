@@ -9,8 +9,8 @@ import com.sky.result.Result;
 import com.sky.service.SetmealService;
 import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController("userSetmealController")
 @RequestMapping("/user/setmeal")
-@Api(tags = "C端-套餐浏览接口")
+@Tag(name = "C端-套餐浏览接口")
 public class SetmealController {
     @Autowired
     private SetmealService setmealService;
@@ -31,7 +31,7 @@ public class SetmealController {
      * @return
      */
     @GetMapping("/list")
-    @ApiOperation("根据分类id查询套餐")
+    @Operation(summary = "根据分类id查询套餐")
     @Cacheable(cacheNames="setmealCache",key = "#categoryId")//key: setmealCache::100
     public Result<List<Setmeal>> list(Long categoryId) {
         Setmeal setmeal = new Setmeal();
@@ -49,7 +49,7 @@ public class SetmealController {
      * @return
      */
     @GetMapping("/dish/{id}")
-    @ApiOperation("根据套餐id查询包含的菜品列表")
+    @Operation(summary = "根据套餐id查询包含的菜品列表")
     public Result<List<DishItemVO>> dishList(@PathVariable("id") Long id) {
         List<DishItemVO> list = setmealService.getDishItemById(id);
         return Result.success(list);
@@ -60,7 +60,7 @@ public class SetmealController {
      * @return
      */
     @GetMapping("/page")
-    @ApiOperation("分页查询")
+    @Operation(summary = "分页查询")
     public Result<PageResult> page(SetmealPageQueryDTO setmealPageQueryDTO) {
         PageResult pageResult = setmealService.pageQuery(setmealPageQueryDTO);
         return Result.success(pageResult);
@@ -71,7 +71,7 @@ public class SetmealController {
      * @return
      */
     @DeleteMapping
-    @ApiOperation("批量删除套餐")
+    @Operation(summary = "批量删除套餐")
     public Result delete(@RequestParam List<Long> ids){
         setmealService.deleteBatch(ids);
         return Result.success();
@@ -83,7 +83,7 @@ public class SetmealController {
      * @return
      */
     @GetMapping("/{id}")
-    @ApiOperation("根据id查询套餐")
+    @Operation(summary = "根据id查询套餐")
     public Result<SetmealVO> getById(@PathVariable Long id) {
         SetmealVO setmealVO = setmealService.getByIdWithDish(id);
         return Result.success(setmealVO);
@@ -96,7 +96,7 @@ public class SetmealController {
      * @return
      */
     @PutMapping
-    @ApiOperation("修改套餐")
+    @Operation(summary = "修改套餐")
     public Result update(@RequestBody SetmealDTO setmealDTO) {
         setmealService.update(setmealDTO);
         return Result.success();
@@ -109,7 +109,7 @@ public class SetmealController {
      * @return
      */
     @PostMapping("/status/{status}")
-    @ApiOperation("套餐起售停售")
+    @Operation(summary = "套餐起售停售")
     public Result startOrStop(@PathVariable Integer status, Long id) {
         setmealService.startOrStop(status, id);
         return Result.success();
