@@ -6,7 +6,7 @@
     <parent>
         <artifactId>spring-boot-starter-parent</artifactId>
         <groupId>org.springframework.boot</groupId>
-        <version>4.0.0</version>
+        <version>4.0.3</version>
     </parent>
     <groupId>com.sky</groupId>
     <artifactId>sky-take-out</artifactId>
@@ -22,15 +22,17 @@
         <mybatis.spring>4.0.1</mybatis.spring>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <lombok.version>1.18.44</lombok.version>
-        <fastjson>1.2.83</fastjson>
-        <commons.lang3>3.17.0</commons.lang3>
+        <fastjson2>2.0.61</fastjson2>
+        <commons.lang3>3.20.0</commons.lang3>
         <druid>1.2.24</druid>
-        <pagehelper>2.1.0</pagehelper>
-        <aliyun.sdk.oss>3.17.4</aliyun.sdk.oss>
+        <pagehelper>2.1.1</pagehelper>
+        <aliyun.sdk.oss>3.18.5</aliyun.sdk.oss>
         <knife4j>4.5.0</knife4j>
         <aspectj>1.9.22</aspectj>
-        <jjwt.version>0.12.6</jjwt.version>
-        <poi>5.2.5</poi>
+        <jjwt.version>0.13.0</jjwt.version>
+        <poi>5.5.1</poi>
+        <validation-api>3.1.1</validation-api>
+        <hibernate-validator>9.1.0.Final</hibernate-validator>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -47,9 +49,9 @@
             </dependency>
 
             <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>${fastjson}</version>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2-extension-spring6</artifactId>
+                <version>${fastjson2}</version>
             </dependency>
 
             <!-- commons-lang2 已替换为 commons-lang3 -->
@@ -59,11 +61,7 @@
                 <version>${commons.lang3}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-3-starter</artifactId>
-                <version>${druid}</version>
-            </dependency>
+            <!-- Spring Boot 4.0 使用内置 HikariCP 作为数据源管理 -->
 
             <dependency>
                 <groupId>com.github.pagehelper</groupId>
@@ -125,6 +123,18 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>
                 <version>${poi}</version>
+            </dependency>
+
+            <!-- 验证框架 -->
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>${validation-api}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator}</version>
             </dependency>
 
             <!--微信支付-->

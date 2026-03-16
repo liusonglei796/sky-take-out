@@ -1,9 +1,10 @@
 package com.sky.exception;
 
-public class DeletionNotAllowedException extends BaseException {
-
-    public DeletionNotAllowedException(String msg) {
-        super(msg);
+/**
+ * 删除不允许异常
+ */
+public class DeletionNotAllowedException extends BusinessException {
+    public DeletionNotAllowedException(String message) {
+        super(400, message);
     }
-
 }

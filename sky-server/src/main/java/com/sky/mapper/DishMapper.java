@@ -45,16 +45,16 @@ public interface DishMapper {
     @Select("select * from dish where id = #{id}")
     Dish getById(Long id);
 
-    //根据id删除菜品数据
-    @Delete("delete from dish where id = #{id}")
-    void deleteById(Long id);
+    /**
+     * 根据id集合批量删除菜品数据
+     * @param ids
+     */
+    void deleteByIds(List<Long> ids);
+
     //菜品的起售停售
     @Update("update dish d set d.status=#{status} where id=#{id}")
     void update(Dish dish);
     //根据id查询菜品数据
     @Select("select * from dish where id = #{id}")
     DishVO getDishById(Long id);
-    //根据分类id查询菜品数据
-    @Select("select * from dish where category_id = #{categoryId}")
-    List<Dish> getDishByCgId(Dish dish);
 }

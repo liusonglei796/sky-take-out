@@ -1,0 +1,17 @@
+# Docker build context ignore
+target/
+!.target/*.jar
+*.class
+*.log
+*.iml
+.idea/
+.vscode/
+.git/
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+compile.log
+*.md
+.spec-workflow/
+.sky/

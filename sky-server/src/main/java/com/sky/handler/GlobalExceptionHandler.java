@@ -1,42 +1,78 @@
 package com.sky.handler;
 
-import com.sky.constant.MessageConstant;
 import com.sky.exception.BaseException;
+import com.sky.exception.BusinessException;
 import com.sky.result.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
-import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.stream.Collectors;
 
 /**
- * 全局异常处理器，处理项目中抛出的业务异常
+ * 全局异常处理器
  */
-@RestControllerAdvice
 @Slf4j
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
-     * 捕获业务异常
-     * @param ex
-     * @return
+     * 处理业务异常
      */
-    @ExceptionHandler
-    public Result exceptionHandler(BaseException ex){
-        log.error("异常信息：{}", ex.getMessage());
-        return Result.error(ex.getMessage());
-    }
-    @ExceptionHandler
-    public Result exceptionHandler(SQLIntegrityConstraintViolationException ex){
-        String message = ex.getMessage();
-        if(message.contains("Duplicate entry")){
-            String[] split = message.split(" ");
-            String username=split[2];
-            String msg = username + "已存在";
-            return Result.error(msg);
-        }else{
-            return Result.error("未知错误");
-        }
+    @ExceptionHandler(BaseException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public Result<Object> handleBaseException(BaseException ex, WebRequest request) {
+        log.warn("业务异常: [{}] {}", ex.getCode(), ex.getMessage());
+        return Result.error(ex.getCode(), ex.getMessage());
     }
 
+    /**
+     * 处理方法参数验证异常
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public Result<Object> handleValidationException(MethodArgumentNotValidException ex, WebRequest request) {
+        BindingResult bindingResult = ex.getBindingResult();
+        String message = bindingResult.getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        log.warn("参数验证失败: {}", message);
+        return Result.error(422, "参数验证失败: " + message);
+    }
+
+    /**
+     * 处理系统异常
+     */
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.OK)
+    public Result<Object> handleException(Exception ex, WebRequest request) {
+        log.error("系统异常", ex);
+        return Result.error(500, "系统内部错误，请稍后重试");
+    }
+
+    /**
+     * 处理 NullPointerException
+     */
+    @ExceptionHandler(NullPointerException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public Result<Object> handleNullPointerException(NullPointerException ex, WebRequest request) {
+        log.error("空指针异常", ex);
+        return Result.error(500, "系统内部错误: 空指针异常");
+    }
+
+    /**
+     * 处理 IllegalArgumentException
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public Result<Object> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+        log.warn("非法参数异常: {}", ex.getMessage());
+        return Result.error(400, "非法参数: " + ex.getMessage());
+    }
 }

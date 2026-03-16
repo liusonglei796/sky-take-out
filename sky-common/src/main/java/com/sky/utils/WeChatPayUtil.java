@@ -1,10 +1,11 @@
 package com.sky.utils;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.sky.properties.WeChatProperties;
 import com.wechat.pay.contrib.apache.httpclient.WechatPayHttpClientBuilder;
 import com.wechat.pay.contrib.apache.httpclient.util.PemUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -33,6 +34,7 @@ import java.util.List;
  * 微信支付工具类
  */
 @Component
+@Slf4j
 public class WeChatPayUtil {
 
     //微信支付下单接口地址
@@ -67,7 +69,7 @@ public class WeChatPayUtil {
             CloseableHttpClient httpClient = builder.build();
             return httpClient;
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            log.error("加载微信支付私钥或证书文件失败", e);
             return null;
         }
     }
@@ -168,7 +170,7 @@ public class WeChatPayUtil {
         String bodyAsString = jsapi(orderNum, total, description, openid);
         //解析返回结果
         JSONObject jsonObject = JSON.parseObject(bodyAsString);
-        System.out.println(jsonObject);
+        log.info("微信支付下单返回结果: {}", jsonObject);
 
         String prepayId = jsonObject.getString("prepay_id");
         if (prepayId != null) {

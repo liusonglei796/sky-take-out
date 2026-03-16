@@ -1,7 +1,8 @@
 package com.sky.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import lombok.RequiredArgsConstructor;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sky.constant.MessageConstant;
@@ -13,7 +14,6 @@ import com.sky.properties.WeChatProperties;
 import com.sky.service.UserService;
 import com.sky.utils.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,12 +22,11 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     public static final String WX_LOGIN = "https://api.weixin.qq.com/sns/jscode2session";
-    @Autowired
-    private WeChatProperties weChatProperties;
-    @Autowired
-    private UserMapper userMapper;
+    private final WeChatProperties weChatProperties;
+    private final UserMapper userMapper;
 
     //微信登录
     public User wxLogin(UserLoginDTO userLoginDTO) {

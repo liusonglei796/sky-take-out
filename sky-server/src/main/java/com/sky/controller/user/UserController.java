@@ -1,5 +1,6 @@
 package com.sky.controller.user;
 
+import lombok.RequiredArgsConstructor;
 import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.UserLoginDTO;
 import com.sky.entity.User;
@@ -9,7 +10,6 @@ import com.sky.service.UserService;
 import com.sky.utils.JwtUtil;
 import com.sky.vo.UserLoginVO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,13 +21,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/user/user")
 @Slf4j
+@RequiredArgsConstructor
 public class UserController {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private JwtUtil jwtUtil;
-    @Autowired
-    private JwtProperties jwtProperties;
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
+    private final JwtProperties jwtProperties;
 
     @PostMapping("/login")
     public Result<UserLoginVO> login(@RequestBody UserLoginDTO userLoginDTO){

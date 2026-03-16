@@ -1,5 +1,6 @@
 package com.sky.controller.user;
 
+import lombok.RequiredArgsConstructor;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.result.Result;
@@ -8,15 +9,14 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController("userOrderController")
 @RequestMapping("/user/order")
 @Slf4j
+@RequiredArgsConstructor
 public class OrderController {
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
     @PostMapping("submit")
     public Result<OrderSubmitVO> submit(@RequestBody OrdersSubmitDTO ordersSubmitDTO){
         log.info("用户下单：{}", ordersSubmitDTO);

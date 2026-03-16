@@ -1,7 +1,8 @@
 package com.sky.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import lombok.RequiredArgsConstructor;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.OrdersPaymentDTO;
@@ -16,7 +17,6 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.websocket.WebSocketServer;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,25 +29,20 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@Transactional
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private OrderMapper orderMapper;
-    @Autowired
-    private OrderDetailMapper orderDetailMapper;
-    @Autowired
-    private AddressBookMapper addressBookMapper;
-    @Autowired
-    private ShoppingCartMapper shoppingCartMapper;
-    @Autowired
-    private WeChatPayUtil weChatPayUtil;
-    @Autowired
-    private WebSocketServer webSocketServer;
+    private final UserMapper userMapper;
+    private final OrderMapper orderMapper;
+    private final OrderDetailMapper orderDetailMapper;
+    private final AddressBookMapper addressBookMapper;
+    private final ShoppingCartMapper shoppingCartMapper;
+    private final WeChatPayUtil weChatPayUtil;
+    private final WebSocketServer webSocketServer;
 
     //用户下单
     @Override
+    @Transactional
     public OrderSubmitVO submitOrder(OrdersSubmitDTO ordersSubmitDTO) {
         //1.处理各种业务异常（地址簿为空，购物车数据为空）
         AddressBook addressBook = addressBookMapper.getById(ordersSubmitDTO.getAddressBookId());
@@ -69,9 +64,9 @@ public class OrderServiceImpl implements OrderService {
         Orders orders = new Orders();
         BeanUtils.copyProperties(ordersSubmitDTO, orders);
         orders.setOrderTime(LocalDateTime.now());
-        orders.setPayStatus(1);
-        orders.setStatus(1);
-        orders.setNumber(String.valueOf(System.currentTimeMillis()));
+        orders.setPayStatus(Orders.UN_PAID);
+        orders.setStatus(Orders.PENDING_PAYMENT);
+        orders.setNumber(String.valueOf(com.sky.utils.IdGenerator.getInstance().nextId()));
         orders.setPhone(addressBook.getPhone());
         orders.setUserId(userId);
 
@@ -131,6 +126,7 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param outTradeNo
      */
+    @Transactional
     public void paySuccess(String outTradeNo) {
 
         // 根据订单号查询订单
@@ -153,20 +149,4 @@ public class OrderServiceImpl implements OrderService {
         String json = JSON.toJSONString( map );
         webSocketServer.sendToAllClient(json);
     }
-//    //客户催单
-//    @Override
-//    public void reminder(Long id) {
-//        //根据ID查询订单
-//        Orders ordersDB = orderMapper.getByNumber(id);
-//        //校验订单是否存在
-//        if(ordersDB==null){
-//            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
-//        }
-//        Map map=new HashMap();
-//        map.put("type",2);
-//        map.put("orderId",id);
-//        map.put("content","订单号："+ordersDB.getNumber());
-//        //通过websocket向客户端推送消息
-//        webSocketServer.sendToAllClient(JSON.toJSONString( map));
-//    }
 }
