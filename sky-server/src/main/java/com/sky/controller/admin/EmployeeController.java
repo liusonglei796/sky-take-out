@@ -1,5 +1,6 @@
 package com.sky.controller.admin;
 
+import lombok.RequiredArgsConstructor;
 import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
@@ -12,7 +13,6 @@ import com.sky.vo.EmployeeLoginVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,12 +28,11 @@ import java.util.Map;
 @RequestMapping("/admin/employee")
 @Slf4j
 @Tag(name="员工相关接口")
+@RequiredArgsConstructor
 public class EmployeeController {
 
-    @Autowired
-    private EmployeeService employeeService;
-    @Autowired
-    private JwtProperties jwtProperties;
+    private final EmployeeService employeeService;
+    private final JwtProperties jwtProperties;
 
     /**
      * 登录

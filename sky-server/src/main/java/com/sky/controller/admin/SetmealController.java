@@ -1,6 +1,7 @@
 package com.sky.controller.admin;
 
 
+import lombok.RequiredArgsConstructor;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.result.PageResult;
@@ -10,7 +11,6 @@ import com.sky.vo.SetmealVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +20,10 @@ import java.util.List;
 @RequestMapping("/admin/setmeal")
 @Tag(name = "套餐相关接口")
 @Slf4j
+@RequiredArgsConstructor
 public class SetmealController {
 
-        @Autowired
-        private SetmealService setmealService;
+        private final SetmealService setmealService;
 
         /**
          * 新增套餐

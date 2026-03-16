@@ -1,45 +1,19 @@
-//package com.sky.controller.user;
-//
-//import com.sky.result.Result;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.data.redis.core.RedisTemplate;
-//import org.springframework.web.bind.annotation.*;
-//
-//@RestController("userShopController")
-//@Slf4j
-//@RequestMapping("/user/shop")
-//public class ShopController {
-//    @Autowired
-//    private RedisTemplate redisTemplate;
-//
-//    //查询营业状态
-//    @GetMapping("/status")
-//    public Result<Integer> getStatus(){
-//        Integer status= redisTemplate.opsForValue().get("SHOP_STATUS");
-//        log.info("获取到店铺的营业状态{}",status==1?"营业中":"打烊中");
-//        return Result.success(status);
-//    }
-//
-//
-//}
-
 package com.sky.controller.user;
 
+import lombok.RequiredArgsConstructor;
 import com.sky.result.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate; // 使用 StringRedisTemplate
 import org.springframework.web.bind.annotation.*;
 
 @RestController("userShopController")
 @Slf4j
 @RequestMapping("/user/shop")
+@RequiredArgsConstructor
 public class ShopController {
 
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate; // 注入 StringRedisTemplate
+    private final StringRedisTemplate stringRedisTemplate; // 注入 StringRedisTemplate
 
     /**
      * 设置营业状态

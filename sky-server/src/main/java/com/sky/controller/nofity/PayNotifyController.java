@@ -1,14 +1,13 @@
 package com.sky.controller.nofity;
 
-import com.alibaba.druid.support.json.JSONUtils;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import lombok.RequiredArgsConstructor;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.sky.properties.WeChatProperties;
 import com.sky.service.OrderService;
 import com.wechat.pay.contrib.apache.httpclient.util.AesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,11 +22,10 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/notify")
 @Slf4j
+@RequiredArgsConstructor
 public class PayNotifyController {
-    @Autowired
-    private OrderService orderService;
-    @Autowired
-    private WeChatProperties weChatProperties;
+    private final OrderService orderService;
+    private final WeChatProperties weChatProperties;
 
     /**
      * 支付成功回调
@@ -111,7 +109,7 @@ public class PayNotifyController {
         map.put("code", "SUCCESS");
         map.put("message", "SUCCESS");
         response.setHeader("Content-type", ContentType.APPLICATION_JSON.toString());
-        response.getOutputStream().write(JSONUtils.toJSONString(map).getBytes(StandardCharsets.UTF_8));
+        response.getOutputStream().write(JSON.toJSONString(map).getBytes(StandardCharsets.UTF_8));
         response.flushBuffer();
     }
 }

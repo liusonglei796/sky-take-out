@@ -1,5 +1,6 @@
 package com.sky.controller.user;
 
+import lombok.RequiredArgsConstructor;
 import com.sky.constant.StatusConstant;
 import com.sky.entity.Dish;
 import com.sky.result.Result;
@@ -8,7 +9,6 @@ import com.sky.vo.DishVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,11 +19,10 @@ import java.util.List;
 @RequestMapping("/user/dish")
 @Slf4j
 @Tag(name = "C端-菜品浏览接口")
+@RequiredArgsConstructor
 public class DishController {
-    @Autowired
-    private DishService dishService;
-    @Autowired
-    private RedisTemplate redisTemplate;
+    private final DishService dishService;
+    private final RedisTemplate redisTemplate;
 
     /**
      * 根据分类id查询菜品

@@ -1,5 +1,6 @@
 package com.sky.controller.user;
 
+import lombok.RequiredArgsConstructor;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
@@ -11,7 +12,6 @@ import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +20,9 @@ import java.util.List;
 @RestController("userSetmealController")
 @RequestMapping("/user/setmeal")
 @Tag(name = "C端-套餐浏览接口")
+@RequiredArgsConstructor
 public class SetmealController {
-    @Autowired
-    private SetmealService setmealService;
+    private final SetmealService setmealService;
 
     /**
      * 条件查询

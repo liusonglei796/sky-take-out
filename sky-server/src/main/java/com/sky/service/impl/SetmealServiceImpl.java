@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
@@ -20,7 +21,6 @@ import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +28,11 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SetmealServiceImpl implements SetmealService {
-    @Autowired
-    private SetmealMapper setmealMapper;
-    @Autowired
-    private SetmealDishMapper setmealDishMapper;
-    @Autowired
-    private DishMapper dishMapper;
+    private final SetmealMapper setmealMapper;
+    private final SetmealDishMapper setmealDishMapper;
+    private final DishMapper dishMapper;
     @Transactional
     public void saveWithDish(SetmealDTO setmealDTO) {
         Setmeal setmeal = new Setmeal();
