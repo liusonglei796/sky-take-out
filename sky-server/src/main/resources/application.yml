@@ -7,11 +7,11 @@ spring:
   main:
     allow-circular-references: true
   datasource:
-    druid:
-      driver-class-name: ${sky.datasource.driver-class-name}
-      url: jdbc:mysql://${sky.datasource.host}:${sky.datasource.port}/${sky.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
-      username: ${sky.datasource.username}
-      password: ${sky.datasource.password}
+    # Spring Boot 4.0 使用 HikariCP（已移除 Druid，与 SB4 不兼容）
+    driver-class-name: ${sky.datasource.driver-class-name}
+    url: jdbc:mysql://${sky.datasource.host}:${sky.datasource.port}/${sky.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${sky.datasource.username}
+    password: ${sky.datasource.password}
   # Java 25 虚拟线程（Project Loom），提升高并发吞吐量
   threads:
     virtual:
@@ -50,9 +50,13 @@ knife4j:
 
 sky:
   jwt:
-    # 设置jwt签名加密时使用的秘钥
-    admin-secret-key: itcast
+    # 设置jwt签名加密时使用的秘钥（生产环境应使用环境变量）
+    admin-secret-key: ${sky.jwt.admin-secret-key:itcast}
     # 设置jwt过期时间
     admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
+    # 用户端jwt配置
+    user-secret-key: ${sky.jwt.user-secret-key:itcast}
+    user-ttl: 604800000
+    user-token-name: userToken

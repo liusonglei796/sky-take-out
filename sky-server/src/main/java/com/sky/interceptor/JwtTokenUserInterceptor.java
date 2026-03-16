@@ -1,12 +1,12 @@
 package com.sky.interceptor;
 
+import lombok.RequiredArgsConstructor;
 import com.sky.constant.JwtClaimsConstant;
 import com.sky.context.BaseContext;
 import com.sky.properties.JwtProperties;
 import com.sky.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -18,10 +18,10 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class JwtTokenUserInterceptor implements HandlerInterceptor {
 
-    @Autowired
-    private JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
 
     /**
      * 校验jwt
@@ -34,9 +34,8 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
      */
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
-        String authHeader = request.getHeader("Authorization");
 
-        log.info("用户请求路径: {}, Authorization: {}", uri, authHeader);
+        log.info("用户请求路径: {}", uri);
 
 
 
@@ -64,5 +63,13 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
             response.setStatus(401);
             return false;
         }
+    }
+
+    /**
+     * 请求完成后清理 ThreadLocal，防止内存泄漏
+     */
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        BaseContext.removeCurrentId();
     }
 }

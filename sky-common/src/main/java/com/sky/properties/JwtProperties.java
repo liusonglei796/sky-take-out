@@ -1,7 +1,6 @@
 package com.sky.properties;
 
 import lombok.Data;
-import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -13,19 +12,15 @@ public class JwtProperties {
     /**
      * 管理端员工生成jwt令牌相关配置
      */
-    @NonNull
-    private String adminSecretKey;
+    private String adminSecretKey = "itcast";
     private long adminTtl;
-    @NonNull
-    private String adminTokenName;
+    private String adminTokenName = "token";
 
     /**
      * 用户端微信用户生成jwt令牌相关配置
      */
-    @NonNull
-    private String userSecretKey;
+    private String userSecretKey = "itcast";
     private long userTtl;
-    @NonNull
-    private String userTokenName;
+    private String userTokenName = "userToken";
 
 }

@@ -1,0 +1,86 @@
+# 苍穹外卖 - Docker Compose (Spring Boot 4.0.0)
+# 端口规划（已避开宿主机占用端口：80/443/3306/3307/6379/6380/9092/5173）：
+#   MySQL : 宿主 3308 → 容器 3306
+#   Redis : 宿主 6381 → 容器 6379
+#   App   : 宿主 8081 → 容器 8080
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: sky-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: sky_take_out
+      TZ: Asia/Shanghai
+    ports:
+      - "3308:3306"
+    volumes:
+      - sky-mysql-data:/var/lib/mysql
+      # - ./sql:/docker-entrypoint-initdb.d  # 放入数据库初始化脚本
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: sky-redis
+    restart: always
+    ports:
+      - "6381:6379"
+    volumes:
+      - sky-redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Sky Take Out 应用 (Spring Boot 4.0.0)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sky-app
+    restart: always
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # MySQL 配置（HikariCP，容器内部通过服务名访问）
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sky_take_out?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      # Redis 配置
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      # JWT 配置
+      SKY_JWT_ADMIN_SECRET_KEY: ${SKY_JWT_ADMIN_SECRET_KEY:-itcast}
+      SKY_JWT_USER_SECRET_KEY: ${SKY_JWT_USER_SECRET_KEY:-itcast}
+      # JVM 时区
+      TZ: Asia/Shanghai
+      JAVA_TOOL_OPTIONS: "-Duser.timezone=Asia/Shanghai"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  sky-mysql-data:
+    name: sky-mysql-data
+  sky-redis-data:
+    name: sky-redis-data
